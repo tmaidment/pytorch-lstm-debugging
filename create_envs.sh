@@ -14,4 +14,5 @@ create_env() {
 
 create_env "1.13.0"
 create_env "2.0.1"
+create_env "2.10.0"
 create_env "2.4.1"

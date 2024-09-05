@@ -13,4 +13,5 @@ run_test() {
 
 run_test "1.13.0"
 run_test "2.0.1"
+run_test "2.10.0"
 run_test "2.4.1"
