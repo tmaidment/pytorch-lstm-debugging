@@ -5,6 +5,7 @@ import numpy as np
 import csv
 import os
 import psutil
+from tqdm import tqdm
 
 # Set random seed for reproducibility
 torch.manual_seed(0)
@@ -31,11 +32,11 @@ def run_inference(model, data):
     with torch.no_grad():
         return model(data)
 
-def measure_performance(model, data, num_warmup_runs=10, num_hot_runs=90):
+def measure_performance(model, data, num_warmup_runs=3, num_hot_runs=90):
     # Warm-up phase
     warmup_times = []
     peak_memory_warmup = 0
-    for _ in range(num_warmup_runs):
+    for _ in tqdm(range(num_warmup_runs), desc="Warm-up phase", leave=False):
         start_time = time.time()
         _ = run_inference(model, data)
         end_time = time.time()
@@ -45,7 +46,7 @@ def measure_performance(model, data, num_warmup_runs=10, num_hot_runs=90):
     # Hot phase
     hot_times = []
     peak_memory_hot = 0
-    for _ in range(num_hot_runs):
+    for _ in tqdm(range(num_hot_runs), desc="Hot phase", leave=False):
         start_time = time.time()
         _ = run_inference(model, data)
         end_time = time.time()
@@ -130,6 +131,8 @@ if __name__ == "__main__":
     results.append(run_test(f"{torch_version}"))
     if torch_version.startswith("2."):
         results.append(run_test(f"{torch_version} (compiled)", compile_model=True))
-        results.append(run_test(f"{torch_version} (compiled, inductor backend)", compile_model=True, backend="inductor"))
+        torch_backends = torch._dynamo.list_backends()
+        for backend in torch_backends:
+            results.append(run_test(f"{torch_version} (compiled, {backend})", compile_model=True, backend=backend))
     
     write_results_to_csv(results)
