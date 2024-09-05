@@ -82,33 +82,37 @@ def run_test(torch_version, compile_model=False, backend=None):
     num_samples = 1000
     seq_length = 50
     
-    # Create model and data
-    model = SimpleLSTM(input_size, hidden_size, output_size)
-    data = generate_data(num_samples, seq_length, input_size)
-    
-    if compile_model and hasattr(torch, 'compile'):
-        model = torch.compile(model, backend=backend)
-    
-    # Measure performance
-    avg_warmup_time, avg_hot_time, peak_memory_warmup, peak_memory_hot = measure_performance(model, data)
-    model_size = get_model_size(model)
-    
-    print(f"Average warmup inference time: {avg_warmup_time:.6f} seconds")
-    print(f"Average hot inference time: {avg_hot_time:.6f} seconds")
-    print(f"Peak memory usage (warmup): {peak_memory_warmup / 1024**2:.2f} MB")
-    print(f"Peak memory usage (hot): {peak_memory_hot / 1024**2:.2f} MB")
-    print(f"Model size: {model_size:.2f} MB")
-    
-    return {
-        "torch_version": torch_version,
-        "compiled": compile_model,
-        "backend": backend if compile_model else "N/A",
-        "avg_warmup_inference_time": avg_warmup_time,
-        "avg_hot_inference_time": avg_hot_time,
-        "peak_memory_warmup_mb": peak_memory_warmup / 1024**2,
-        "peak_memory_hot_mb": peak_memory_hot / 1024**2,
-        "model_size_mb": model_size
-    }
+    try:
+        # Create model and data
+        model = SimpleLSTM(input_size, hidden_size, output_size)
+        data = generate_data(num_samples, seq_length, input_size)
+        
+        if compile_model and hasattr(torch, 'compile'):
+            model = torch.compile(model, backend=backend)
+        
+        # Measure performance
+        avg_warmup_time, avg_hot_time, peak_memory_warmup, peak_memory_hot = measure_performance(model, data)
+        model_size = get_model_size(model)
+        
+        print(f"Average warmup inference time: {avg_warmup_time:.6f} seconds")
+        print(f"Average hot inference time: {avg_hot_time:.6f} seconds")
+        print(f"Peak memory usage (warmup): {peak_memory_warmup / 1024**2:.2f} MB")
+        print(f"Peak memory usage (hot): {peak_memory_hot / 1024**2:.2f} MB")
+        print(f"Model size: {model_size:.2f} MB")
+        
+        return {
+            "torch_version": torch_version,
+            "compiled": compile_model,
+            "backend": backend if compile_model else "N/A",
+            "avg_warmup_inference_time": avg_warmup_time,
+            "avg_hot_inference_time": avg_hot_time,
+            "peak_memory_warmup_mb": peak_memory_warmup / 1024**2,
+            "peak_memory_hot_mb": peak_memory_hot / 1024**2,
+            "model_size_mb": model_size
+        }
+    except Exception as e:
+        print(f"Error: {e}")
+        return {}
 
 def write_results_to_csv(results, filename="pytorch_performance_results.csv"):
     fieldnames = ["torch_version", "compiled", "backend", "avg_warmup_inference_time", "avg_hot_inference_time", "peak_memory_warmup_mb", "peak_memory_hot_mb", "model_size_mb"]

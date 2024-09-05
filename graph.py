@@ -83,7 +83,7 @@ if __name__ == "__main__":
     create_heatmap(data)
 
     # Create plots excluding specific versions
-    exclude_versions = []  
+    exclude_versions = ["2.0.1", "2.0.1 (compiled, inductor)", "2.0.1 (compiled, ipex)", "2.0.1 (compiled, nvprims_nvfuser)", "2.0.1 (compiled, onnxrt)", "2.0.1 (compiled, tvm)"]  
     create_plots(data, exclude_versions)
     create_heatmap(data, exclude_versions)
 
